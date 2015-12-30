@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyFactory;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -25,15 +24,16 @@ public class CertificateUtils {
         return factory.generatePrivate(privKeySpec);
     }
 
-    public static PublicKey extractPublicKey(String filename)
+    public static Certificate getCertificateByName(String filename)
             throws InvalidKeySpecException, IOException, CertificateException {
         InputStream inStream = CertificateUtils.class.getResourceAsStream(CERTIFICATE_DIR + filename);
         //Solo existe un tipo de certifiacado
         //http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html
         Certificate cert = CertificateFactory.getInstance("X.509").generateCertificate(inStream);
         inStream.close();
-        return cert.getPublicKey();
+        return cert;
 
     }
+
 
 }

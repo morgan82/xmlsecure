@@ -22,7 +22,9 @@ import org.apache.xml.security.encryption.EncryptedData;
 import org.apache.xml.security.encryption.EncryptedKey;
 import org.apache.xml.security.encryption.XMLCipher;
 import org.apache.xml.security.encryption.XMLEncryptionException;
+import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
+import org.apache.xml.security.keys.content.X509Data;
 import org.globallogic.xmlsec.utils.CertificateUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -38,7 +40,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Key;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 
 /**
@@ -72,9 +76,19 @@ public class Encrypter {
         return keyGenerator.generateKey();
     }
 
-    private static void setKeyInfo(Document document, EncryptedKey encryptedKey, XMLCipher xmlCipher) throws XMLEncryptionException {
+    private static void setKeyInfo(Document document, EncryptedKey encryptedKey, XMLCipher xmlCipher, Certificate cer)
+            throws XMLSecurityException {
         EncryptedData encryptedData = xmlCipher.getEncryptedData();
+        //Key info parent
         KeyInfo keyInfo = new KeyInfo(document);
+        //Key info child
+        KeyInfo keyInfoEncripKey = new KeyInfo(document);
+        //data to insert keyinfo child
+        X509Data data = new X509Data(document);
+        data.addCertificate((X509Certificate) cer);
+        keyInfoEncripKey.add(data);
+        
+        encryptedKey.setKeyInfo(keyInfoEncripKey);
         keyInfo.add(encryptedKey);
         encryptedData.setKeyInfo(keyInfo);
     }
@@ -85,12 +99,11 @@ public class Encrypter {
         return xmlCipher;
     }
 
-    private static EncryptedKey generateEncryptedKey(Document document, Key symmetricKey, String urlCredential)
+    private static EncryptedKey generateEncryptedKey(Document document, Key symmetricKey, Certificate cer)
             throws InvalidKeySpecException, IOException, CertificateException, XMLEncryptionException {
-        Key kek = CertificateUtils.extractPublicKey(urlCredential);
         String algorithmURI = XMLCipher.RSA_v1dot5;
         XMLCipher keyCipher = XMLCipher.getInstance(algorithmURI);
-        keyCipher.init(XMLCipher.WRAP_MODE, kek);
+        keyCipher.init(XMLCipher.WRAP_MODE, cer.getPublicKey());
         return keyCipher.encryptKey(document, symmetricKey);
     }
 
@@ -116,7 +129,8 @@ public class Encrypter {
         /*
          * Get a key to be used for encrypting the symmetric key.
          */
-        EncryptedKey encryptedKey = generateEncryptedKey(document, symmetricKey, "testaio2.pem");
+        Certificate cer = CertificateUtils.getCertificateByName("testaio2.pem");
+        EncryptedKey encryptedKey = generateEncryptedKey(document, symmetricKey, cer);
         /*
          * Let us encrypt the contents of the document element.
          */
@@ -124,7 +138,7 @@ public class Encrypter {
         /*
          * Setting keyinfo inside the encrypted data being prepared.
          */
-        setKeyInfo(document, encryptedKey, xmlCipher);
+        setKeyInfo(document, encryptedKey, xmlCipher, cer);
         /*
          * doFinal -
          * "true" below indicates that we want to encrypt element's content
