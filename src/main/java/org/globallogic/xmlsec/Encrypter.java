@@ -30,12 +30,10 @@ import org.xml.sax.InputSource;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Key;
@@ -47,17 +45,11 @@ import java.security.Key;
  */
 public class Encrypter {
 
-    static org.slf4j.Logger log =
-            org.slf4j.LoggerFactory.getLogger(
-                    Encrypter.class.getName());
-
     static {
         org.apache.xml.security.Init.init();
     }
 
-    private static Document createSampleDocument() throws Exception {
-
-        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><products><product id=\"1144\"  xmlns=\"http://example.com/product-info\"  xmlns:html=\"http://www.w3.org/1999/xhtml\"><name xml:lang=\"en\">Python Perfect IDE</name><description>Uses mind-reading technology to anticipate and accommodate all user needs in Python development. Implements all <html:code>from __future__ import</html:code>features though the year 3000. Works well with<code>1166</code>.</description></product><p:product id=\"1166\" xmlns:p=\"http://example.com/product-info\"><p:name>XSLT Perfect IDE</p:name><p:description xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:xl=\"http://www.w3.org/1999/xlink\"> <p:code>red</p:code><html:code>blue</html:code><html:div> <ref xl:type=\"simple\" xl:href=\"index.xml\">A link</ref></html:div></p:description></p:product></products>";
+    private static Document stringToXML(String xmlString) throws Exception {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         Document document = null;
@@ -70,46 +62,36 @@ public class Encrypter {
         return document;
     }
 
-    private static SecretKey generateDataEncryptionKey() throws Exception {
+    private static SecretKey generateSymmetricKey() throws Exception {
         String jceAlgorithmName = "AES";
         KeyGenerator keyGenerator = KeyGenerator.getInstance(jceAlgorithmName);
         keyGenerator.init(128);
         return keyGenerator.generateKey();
     }
 
-    private static void outputDocToFile(Document doc, String fileName) throws Exception {
-        File encryptionFile = new File(fileName);
-        //   FileOutputStream f = new FileOutputStream(encryptionFile);
+    private static String xmlToString(Document doc) throws Exception {
 
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-        DOMSource source = new DOMSource(doc);
-        // StreamResult result = new StreamResult(f);
         StringWriter writer = new StringWriter();
-        //transformer.transform(source, result);
-        transformer.transform(new DOMSource(doc.getDocumentElement()),
-                new StreamResult(writer));
-        System.out.println(writer.toString());
-        //f.close();
-        /*System.out.println(
-            "Wrote document containing encrypted data to " + encryptionFile.toURI().toURL().toString()
-        );*/
+        transformer.transform(new DOMSource(doc.getDocumentElement()), new StreamResult(writer));
+        String result = writer.toString();
+        System.out.println(result);
+        return result;
     }
 
     public static void main(String unused[]) throws Exception {
-
-        Document document = createSampleDocument();
-
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><products><product id=\"1144\"  xmlns=\"http://example.com/product-info\"  xmlns:html=\"http://www.w3.org/1999/xhtml\"><name xml:lang=\"en\">Python Perfect IDE</name><description>Uses mind-reading technology to anticipate and accommodate all user needs in Python development. Implements all <html:code>from __future__ import</html:code>features though the year 3000. Works well with<code>1166</code>.</description></product><p:product id=\"1166\" xmlns:p=\"http://example.com/product-info\"><p:name>XSLT Perfect IDE</p:name><p:description xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:xl=\"http://www.w3.org/1999/xlink\"> <p:code>red</p:code><html:code>blue</html:code><html:div> <ref xl:type=\"simple\" xl:href=\"index.xml\">A link</ref></html:div></p:description></p:product></products>";
+        Document document = stringToXML(xmlString);
         /*
          * Get a key to be used for encrypting the element.
          * Here we are generating an AES key.
          */
-        Key symmetricKey = generateDataEncryptionKey();
-
+        Key symmetricKey = generateSymmetricKey();
         /*
          * Get a key to be used for encrypting the symmetric key.
          */
+
         Key kek = CertificateUtils.extractPublicKey("testaio2.pem");
         String algorithmURI = XMLCipher.RSA_v1dot5;
         XMLCipher keyCipher = XMLCipher.getInstance(algorithmURI);
@@ -123,8 +105,7 @@ public class Encrypter {
 
         algorithmURI = XMLCipher.AES_128;
 
-        XMLCipher xmlCipher =
-                XMLCipher.getInstance(algorithmURI);
+        XMLCipher xmlCipher = XMLCipher.getInstance(algorithmURI);
         xmlCipher.init(XMLCipher.ENCRYPT_MODE, symmetricKey);
 
         /*
@@ -143,11 +124,6 @@ public class Encrypter {
          * for the data to be encrypted.
          */
         xmlCipher.doFinal(document, rootElement, true);
-
-        /*
-         * Output the document containing the encrypted information into
-         * a file.
-         */
-        outputDocToFile(document, "build/encryptedInfo.xml");
+        xmlToString(document);
     }
 }
