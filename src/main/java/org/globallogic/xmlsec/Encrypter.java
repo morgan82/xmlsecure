@@ -21,10 +21,10 @@ package org.globallogic.xmlsec;
 import org.apache.xml.security.encryption.EncryptedData;
 import org.apache.xml.security.encryption.EncryptedKey;
 import org.apache.xml.security.encryption.XMLCipher;
+import org.apache.xml.security.encryption.XMLEncryptionException;
 import org.apache.xml.security.keys.KeyInfo;
 import org.globallogic.xmlsec.utils.CertificateUtils;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
 import javax.crypto.KeyGenerator;
@@ -34,9 +34,12 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.security.Key;
+import java.security.cert.CertificateException;
+import java.security.spec.InvalidKeySpecException;
 
 /**
  * This sample demonstrates how to encrypt data inside an xml document.
@@ -69,6 +72,28 @@ public class Encrypter {
         return keyGenerator.generateKey();
     }
 
+    private static void setKeyInfo(Document document, EncryptedKey encryptedKey, XMLCipher xmlCipher) throws XMLEncryptionException {
+        EncryptedData encryptedData = xmlCipher.getEncryptedData();
+        KeyInfo keyInfo = new KeyInfo(document);
+        keyInfo.add(encryptedKey);
+        encryptedData.setKeyInfo(keyInfo);
+    }
+
+    private static XMLCipher getXmlCipher(Key symmetricKey, String algorithmURI) throws XMLEncryptionException {
+        XMLCipher xmlCipher = XMLCipher.getInstance(algorithmURI);
+        xmlCipher.init(XMLCipher.ENCRYPT_MODE, symmetricKey);
+        return xmlCipher;
+    }
+
+    private static EncryptedKey generateEncryptedKey(Document document, Key symmetricKey, String urlCredential)
+            throws InvalidKeySpecException, IOException, CertificateException, XMLEncryptionException {
+        Key kek = CertificateUtils.extractPublicKey(urlCredential);
+        String algorithmURI = XMLCipher.RSA_v1dot5;
+        XMLCipher keyCipher = XMLCipher.getInstance(algorithmURI);
+        keyCipher.init(XMLCipher.WRAP_MODE, kek);
+        return keyCipher.encryptKey(document, symmetricKey);
+    }
+
     private static String xmlToString(Document doc) throws Exception {
 
         TransformerFactory factory = TransformerFactory.newInstance();
@@ -91,31 +116,15 @@ public class Encrypter {
         /*
          * Get a key to be used for encrypting the symmetric key.
          */
-
-        Key kek = CertificateUtils.extractPublicKey("testaio2.pem");
-        String algorithmURI = XMLCipher.RSA_v1dot5;
-        XMLCipher keyCipher = XMLCipher.getInstance(algorithmURI);
-        keyCipher.init(XMLCipher.WRAP_MODE, kek);
-        EncryptedKey encryptedKey = keyCipher.encryptKey(document, symmetricKey);
-
+        EncryptedKey encryptedKey = generateEncryptedKey(document, symmetricKey, "testaio2.pem");
         /*
          * Let us encrypt the contents of the document element.
          */
-        Element rootElement = document.getDocumentElement();
-
-        algorithmURI = XMLCipher.AES_128;
-
-        XMLCipher xmlCipher = XMLCipher.getInstance(algorithmURI);
-        xmlCipher.init(XMLCipher.ENCRYPT_MODE, symmetricKey);
-
+        XMLCipher xmlCipher = getXmlCipher(symmetricKey, XMLCipher.AES_128);
         /*
          * Setting keyinfo inside the encrypted data being prepared.
          */
-        EncryptedData encryptedData = xmlCipher.getEncryptedData();
-        KeyInfo keyInfo = new KeyInfo(document);
-        keyInfo.add(encryptedKey);
-        encryptedData.setKeyInfo(keyInfo);
-
+        setKeyInfo(document, encryptedKey, xmlCipher);
         /*
          * doFinal -
          * "true" below indicates that we want to encrypt element's content
@@ -123,7 +132,9 @@ public class Encrypter {
          * modify the document by replacing the EncrypteData element
          * for the data to be encrypted.
          */
-        xmlCipher.doFinal(document, rootElement, true);
+        xmlCipher.doFinal(document, document.getDocumentElement(), true);
         xmlToString(document);
     }
+
+
 }
