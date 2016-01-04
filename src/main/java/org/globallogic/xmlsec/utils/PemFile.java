@@ -11,8 +11,10 @@ public class PemFile {
 	private PemObject pemObject;
 
 	public PemFile(String filename) throws FileNotFoundException, IOException {
+		//PemReader pemReader = new PemReader(new InputStreamReader(
+		//new FileInputStream(filename)));
 		PemReader pemReader = new PemReader(new InputStreamReader(
-				new FileInputStream(filename)));
+				PemFile.class.getResourceAsStream(CertificateUtils.CERTIFICATE_DIR + filename)));
 		try {
 			this.pemObject = pemReader.readPemObject();
 		} finally {

@@ -56,9 +56,10 @@ public class Encrypter {
         org.apache.xml.security.Init.init();
     }
 
-    private static Document stringToXML(String xmlString) throws Exception {
+    public static Document stringToXML(String xmlString) throws Exception {
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
         Document document = null;
         try {
             document = factory.newDocumentBuilder().parse(new InputSource(new StringReader(xmlString)));
@@ -87,7 +88,7 @@ public class Encrypter {
         X509Data data = new X509Data(document);
         data.addCertificate((X509Certificate) cer);
         keyInfoEncripKey.add(data);
-        
+
         encryptedKey.setKeyInfo(keyInfoEncripKey);
         keyInfo.add(encryptedKey);
         encryptedData.setKeyInfo(keyInfo);
@@ -107,7 +108,7 @@ public class Encrypter {
         return keyCipher.encryptKey(document, symmetricKey);
     }
 
-    private static String xmlToString(Document doc) throws Exception {
+    public static String xmlToString(Document doc) throws Exception {
 
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer();
@@ -120,25 +121,31 @@ public class Encrypter {
 
     public static void main(String unused[]) throws Exception {
         String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><products><product id=\"1144\"  xmlns=\"http://example.com/product-info\"  xmlns:html=\"http://www.w3.org/1999/xhtml\"><name xml:lang=\"en\">Python Perfect IDE</name><description>Uses mind-reading technology to anticipate and accommodate all user needs in Python development. Implements all <html:code>from __future__ import</html:code>features though the year 3000. Works well with<code>1166</code>.</description></product><p:product id=\"1166\" xmlns:p=\"http://example.com/product-info\"><p:name>XSLT Perfect IDE</p:name><p:description xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:xl=\"http://www.w3.org/1999/xlink\"> <p:code>red</p:code><html:code>blue</html:code><html:div> <ref xl:type=\"simple\" xl:href=\"index.xml\">A link</ref></html:div></p:description></p:product></products>";
-        Document document = stringToXML(xmlString);
+
+        System.out.println(encriptXml(xmlString, "testaio2.pem"));
+    }
+
+    public static String encriptXml(String xmlString, String cert){
+        try {
+            Document document = stringToXML(xmlString);
         /*
          * Get a key to be used for encrypting the element.
          * Here we are generating an AES key.
          */
-        Key symmetricKey = generateSymmetricKey();
+            Key symmetricKey = generateSymmetricKey();
         /*
          * Get a key to be used for encrypting the symmetric key.
          */
-        Certificate cer = CertificateUtils.getCertificateByName("testaio2.pem");
-        EncryptedKey encryptedKey = generateEncryptedKey(document, symmetricKey, cer);
+            Certificate cer = CertificateUtils.getCertificateByName(cert);
+            EncryptedKey encryptedKey = generateEncryptedKey(document, symmetricKey, cer);
         /*
          * Let us encrypt the contents of the document element.
          */
-        XMLCipher xmlCipher = getXmlCipher(symmetricKey, XMLCipher.AES_128);
+            XMLCipher xmlCipher = getXmlCipher(symmetricKey, XMLCipher.AES_128);
         /*
          * Setting keyinfo inside the encrypted data being prepared.
          */
-        setKeyInfo(document, encryptedKey, xmlCipher, cer);
+            setKeyInfo(document, encryptedKey, xmlCipher, cer);
         /*
          * doFinal -
          * "true" below indicates that we want to encrypt element's content
@@ -146,9 +153,10 @@ public class Encrypter {
          * modify the document by replacing the EncrypteData element
          * for the data to be encrypted.
          */
-        xmlCipher.doFinal(document, document.getDocumentElement(), true);
-        xmlToString(document);
+            xmlCipher.doFinal(document, document.getDocumentElement(), true);
+            return xmlToString(document);
+        }catch (Exception e){
+            return  null;
+        }
     }
-
-
 }

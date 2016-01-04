@@ -38,7 +38,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.lang.Exception;import java.lang.String;import java.lang.System;import java.security.Key;
+import java.security.Key;
 import java.security.KeyFactory;
 import java.security.Security;
 
@@ -65,22 +65,42 @@ public class Decrypter {
         dbf.setNamespaceAware(true);
         javax.xml.parsers.DocumentBuilder db = dbf.newDocumentBuilder();
         String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><products><xenc:EncryptedData xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\" Type=\"http://www.w3.org/2001/04/xmlenc#Content\"><xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#aes128-cbc\"/><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
-                "<xenc:EncryptedKey><xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa-1_5\"/><xenc:CipherData><xenc:CipherValue>AvUtTOnitgVZdhsUqTqr3wwcpt5qEIZzQ2HGdAyRVYanZAX7u4O/R7BfuEXuwx+zNpLkfihigNkO" +
-                "jLvj1d/gMY9x7xbDSE/zGYDps2CQJfIisGwrhbNCMXwzu7Wf1UbzYp9rF6vf4aXZMkQuCu3vHvmu" +
-                "2GGBbxFxPOJ437L1KaI=</xenc:CipherValue></xenc:CipherData></xenc:EncryptedKey></ds:KeyInfo><xenc:CipherData><xenc:CipherValue>Gz6+F6fzwlL8DRLRS6slismvO7dHyRZmN+uaqY3dZndQIapdBubDf96VHD2z4p2H87qsRMn/m5Am" +
-                "n2bSVmz6zFgPeIlzJrCeO7pwkSjdaclK21IR7rfbYR3i/YubNgbAJQbzW+QWysrkEq/5tPPyd5ni" +
-                "EKihjZjxmOIZ2kgjmKq2FziAY4PEZHkTn2RgR4nGSWYgrgP+KxtMusTQ6QDPavx5YWduoyeqP8fZ" +
-                "WWwbGyf/G9HZVmKzHeGzhdgctHhiNjudXzNru5aQpyceyQOQbt7fuInz1zdOv2lEa5iEfIQOtlPI" +
-                "mrPE0rg+F476fpjU2FBNX0A63/D9MVg5rhj/rfw7qy/0No1B9nxLr2L+aH2HcU3rdI4rydaTkqcj" +
-                "EuFrOrzWervUD7RtOzPjqBOnp73NvUgWaYXuuMEWLo4hpsihQA476TQhlsZVw/0PMrGzA1g5bJ9k" +
-                "O2O7+v+gTSTeJ+ogIALIVnrBHsNshg2PA52p3X4i8orK+JPNYUSUX2uYiotjGFX9e74maE5T0Tf3" +
-                "1uAQLgJsqv9OWUQWYJZ8HMUYsTbyohVao1Ei7CoJYjfuZQbd5m6QimEes4iN0Do0yDkuBERHAgt1" +
-                "ckOsHT1hg4A75F6ufgQWzwoEviV4KqMfPzdp8apoheb42+vam0S2h86wpgvWWbtLZBHLWSHKNlyW" +
-                "BhNS5TykasBXTZ9FpfJ3BjODLxWCFVCDFxkvswJ3wsqxSwbVokilf+MOQTugmh5bHfvxRtuTFvcn" +
-                "6T39UNqx173JlyBuBSwBjTkVlMQio7Z4VG1XX2WiT1JJlrqL8da3NfZfWebLgYOM8I2pI6hp4BrJ" +
-                "c5Fzp6glxbJX60qh5XMXbv7fL2nS/6/ZJ6FV2LYKEr41BYaEKr8xmUinUJRgF4qadZPM808eoDGN" +
-                "cR62uwZ28vBz4Dgj7bKSfXMIa+DfH4ZL8IIPGTZxV/qQd87gPD0KEVN8Agl/bQrt3iUAun1fPM26" +
-                "/zIOfSvAWzW1kEY2IMyVMIAapT7O0ByvUv6d</xenc:CipherValue></xenc:CipherData></xenc:EncryptedData></products>";
+                "<xenc:EncryptedKey><xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa-1_5\"/><ds:KeyInfo>\n" +
+                "<ds:X509Data>\n" +
+                "<ds:X509Certificate>" +
+                "MIIDRjCCAq+gAwIBAgIJAPKtgzF3G3qmMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNVBAYTAkFSMQsw" +
+                "CQYDVQQIEwJBUjELMAkGA1UEBxMCTVoxCzAJBgNVBAoTAkdMMQswCQYDVQQLEwJMRzENMAsGA1UE" +
+                "AxMESXZhbjEkMCIGCSqGSIb3DQEJARYVaXZhbi5iZWVybGlAZ21haWwuY29tMB4XDTE1MTIyODIx" +
+                "MDIwOVoXDTE2MTIyNzIxMDIwOVowdjELMAkGA1UEBhMCQVIxCzAJBgNVBAgTAkFSMQswCQYDVQQH" +
+                "EwJNWjELMAkGA1UEChMCR0wxCzAJBgNVBAsTAkxHMQ0wCwYDVQQDEwRJdmFuMSQwIgYJKoZIhvcN" +
+                "AQkBFhVpdmFuLmJlZXJsaUBnbWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMHP" +
+                "DJ3fWZLFPH9ux2JPEddPhMfVoYiknhKPvOk1JcH268DxFXPwZvEWbxpXQzn6Q7lIwL1APO5HBZpr" +
+                "LZGlZruN8TOY3r5RK2+xmORxlLOkUxWbi+yNZUvBABGooAG4vLi/yMhgpbxAQEedaCJ1PuYggKWH" +
+                "hIJ5hWwzUS7wfw5HAgMBAAGjgdswgdgwHQYDVR0OBBYEFNQ9aZzT1ZaKJPeGGCWGIko/MQeAMIGo" +
+                "BgNVHSMEgaAwgZ2AFNQ9aZzT1ZaKJPeGGCWGIko/MQeAoXqkeDB2MQswCQYDVQQGEwJBUjELMAkG" +
+                "A1UECBMCQVIxCzAJBgNVBAcTAk1aMQswCQYDVQQKEwJHTDELMAkGA1UECxMCTEcxDTALBgNVBAMT" +
+                "BEl2YW4xJDAiBgkqhkiG9w0BCQEWFWl2YW4uYmVlcmxpQGdtYWlsLmNvbYIJAPKtgzF3G3qmMAwG" +
+                "A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAh5fSuBFHm8t1A5EUzIiQH6swPud/MyUfCjqp" +
+                "N8vxrjvrecvGWlQjOpusK6OvvHaBii8nfGniOeXG1Fe4GbL2i2PnhdboPpkCIQJV575vra2Q56Xo" +
+                "n2lPkTcB+kNYFhMCe/FLrRznrTfgDNqETgLzuUqWixNCl5s21/kL7lBD76w=" +
+                "</ds:X509Certificate>\n" +
+                "</ds:X509Data>\n" +
+                "</ds:KeyInfo><xenc:CipherData><xenc:CipherValue>NX1l4A0qVP5cv2l95dLFQqNrLIsxDTxD1L35XqJbmU2+yTDFEld/Lc2KrdqGadeU1Vu7EzsYdk9j" +
+                "iRVgDU7Tnb7wkjnw7xw7oxw27NT4JqTncFu6R2AZqI6qcfH5KDxI/9WBQOEGMZHaBhooMnSd0LBT" +
+                "zinUCI1YNq+82iMCSwI=</xenc:CipherValue></xenc:CipherData></xenc:EncryptedKey></ds:KeyInfo><xenc:CipherData><xenc:CipherValue>wsKjuKBva9YLIOgWSt+XF/fLANCeq6Chm4dVkzSCiRS6TwyHp3nSitt2ylk+M4gLirNAmlxaQyhw" +
+                "pdVI88N7+DlVSLT7bZbS7AO7/HWxVmRTOTAdyXpzOswrBqth33m+7rFKCrcOSkbnqn7F3nl0dhTh" +
+                "iBJQ/3Gx/mU4tPWW/c9EDvDl+s4rU1ziFq7GoZ8XLB8FEBqApkAZgoajcCmalZrD9mkqwpm3Dte+" +
+                "Rn3vRHESsdZzYgDtN5tradGBa+csAx2XzK258mpNckVFUMdQGbR+QBCbPoreZCkHrAV+0NQB4F1y" +
+                "XShRnZUWnXFDyVtRZCT5j8esYhojJGVB6aSOpb/6o0lNLOBg/IbRofY5vy7c5/UPGY9FRUu3I5DF" +
+                "6F4o5EDB/0kDu7eIMfZYFEY6R6xbxk7N/17Wn3XvkK4Yn9I3SYwUgmh2YXB14pMoisTFKiD/TFdz" +
+                "sDeXBWquzOPOKeiLDFOFlrfDHUbiOdaWOl42XQWfNDn4K8qiPveD+KEF/kp+HxLVNWbndddcNiKT" +
+                "/nLq01jVCCUB9p8LmE+8GbzOTJi2FpRiAdg8S9mFeGZ/uNqTN7rwZaK16U036eu6sd0EEM5pELZj" +
+                "2jlNhaf8DT5TvwhjZ+eS3OI+T+IHDNaLuO+fXNAXKMqq+enmJ8gnWC4qwRjH6Kd8gIIx21EVeQAz" +
+                "/U39GBWE0KkbYceN/ode2cNVvqwIAfO7/YG3Rt23aInZjYlWAHXebnRzdrZB7c0TIzYsEc7Y8yWG" +
+                "r1YPr+Spz0Qg3gvUgjFAeCP4diFwUR6jmgD68dzwE+hJcZmvpo+wwaByCSWKy8+S875SJZkM+0p7" +
+                "/PHp+d0hmfRey0Vb4qiDnPQv9ddD9Rzb4D13i/i66N1hEjns3kK0TxkqM7IwN1WzXzY2h51YGHEn" +
+                "mDbO0lDhf1sWZjT7kJ2LttknhXn6NENPerzbNbLY6E2vHvo62VorIBOtKOzbZKzqA6ZisZY9MP+r" +
+                "TCsuPThkLNtXPhrdXAe5Vyebqs2A24A3uIf/</xenc:CipherValue></xenc:CipherData></xenc:EncryptedData></products>";
 
 
         Document document = db.parse(new InputSource(new StringReader(xmlString)));
@@ -148,38 +168,88 @@ public class Decrypter {
         }
     */
     public static void main(String unused[]) throws Exception {
-        Document document = loadEncryptionDocument();
 
-        Element encryptedDataElement =
-                (Element) document.getElementsByTagNameNS(
-                        EncryptionConstants.EncryptionSpecNS,
-                        EncryptionConstants._TAG_ENCRYPTEDDATA).item(0);
+        String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><products><xenc:EncryptedData xmlns:xenc=\"http://www.w3.org/2001/04/xmlenc#\" Type=\"http://www.w3.org/2001/04/xmlenc#Content\"><xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#aes128-cbc\"/><ds:KeyInfo xmlns:ds=\"http://www.w3.org/2000/09/xmldsig#\">\n" +
+                "<xenc:EncryptedKey><xenc:EncryptionMethod Algorithm=\"http://www.w3.org/2001/04/xmlenc#rsa-1_5\"/><ds:KeyInfo>\n" +
+                "<ds:X509Data>\n" +
+                "<ds:X509Certificate>" +
+                "MIIDRjCCAq+gAwIBAgIJAPKtgzF3G3qmMA0GCSqGSIb3DQEBBQUAMHYxCzAJBgNVBAYTAkFSMQsw" +
+                "CQYDVQQIEwJBUjELMAkGA1UEBxMCTVoxCzAJBgNVBAoTAkdMMQswCQYDVQQLEwJMRzENMAsGA1UE" +
+                "AxMESXZhbjEkMCIGCSqGSIb3DQEJARYVaXZhbi5iZWVybGlAZ21haWwuY29tMB4XDTE1MTIyODIx" +
+                "MDIwOVoXDTE2MTIyNzIxMDIwOVowdjELMAkGA1UEBhMCQVIxCzAJBgNVBAgTAkFSMQswCQYDVQQH" +
+                "EwJNWjELMAkGA1UEChMCR0wxCzAJBgNVBAsTAkxHMQ0wCwYDVQQDEwRJdmFuMSQwIgYJKoZIhvcN" +
+                "AQkBFhVpdmFuLmJlZXJsaUBnbWFpbC5jb20wgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAMHP" +
+                "DJ3fWZLFPH9ux2JPEddPhMfVoYiknhKPvOk1JcH268DxFXPwZvEWbxpXQzn6Q7lIwL1APO5HBZpr" +
+                "LZGlZruN8TOY3r5RK2+xmORxlLOkUxWbi+yNZUvBABGooAG4vLi/yMhgpbxAQEedaCJ1PuYggKWH" +
+                "hIJ5hWwzUS7wfw5HAgMBAAGjgdswgdgwHQYDVR0OBBYEFNQ9aZzT1ZaKJPeGGCWGIko/MQeAMIGo" +
+                "BgNVHSMEgaAwgZ2AFNQ9aZzT1ZaKJPeGGCWGIko/MQeAoXqkeDB2MQswCQYDVQQGEwJBUjELMAkG" +
+                "A1UECBMCQVIxCzAJBgNVBAcTAk1aMQswCQYDVQQKEwJHTDELMAkGA1UECxMCTEcxDTALBgNVBAMT" +
+                "BEl2YW4xJDAiBgkqhkiG9w0BCQEWFWl2YW4uYmVlcmxpQGdtYWlsLmNvbYIJAPKtgzF3G3qmMAwG" +
+                "A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAh5fSuBFHm8t1A5EUzIiQH6swPud/MyUfCjqp" +
+                "N8vxrjvrecvGWlQjOpusK6OvvHaBii8nfGniOeXG1Fe4GbL2i2PnhdboPpkCIQJV575vra2Q56Xo" +
+                "n2lPkTcB+kNYFhMCe/FLrRznrTfgDNqETgLzuUqWixNCl5s21/kL7lBD76w=" +
+                "</ds:X509Certificate>\n" +
+                "</ds:X509Data>\n" +
+                "</ds:KeyInfo><xenc:CipherData><xenc:CipherValue>NX1l4A0qVP5cv2l95dLFQqNrLIsxDTxD1L35XqJbmU2+yTDFEld/Lc2KrdqGadeU1Vu7EzsYdk9j" +
+                "iRVgDU7Tnb7wkjnw7xw7oxw27NT4JqTncFu6R2AZqI6qcfH5KDxI/9WBQOEGMZHaBhooMnSd0LBT" +
+                "zinUCI1YNq+82iMCSwI=</xenc:CipherValue></xenc:CipherData></xenc:EncryptedKey></ds:KeyInfo><xenc:CipherData><xenc:CipherValue>wsKjuKBva9YLIOgWSt+XF/fLANCeq6Chm4dVkzSCiRS6TwyHp3nSitt2ylk+M4gLirNAmlxaQyhw" +
+                "pdVI88N7+DlVSLT7bZbS7AO7/HWxVmRTOTAdyXpzOswrBqth33m+7rFKCrcOSkbnqn7F3nl0dhTh" +
+                "iBJQ/3Gx/mU4tPWW/c9EDvDl+s4rU1ziFq7GoZ8XLB8FEBqApkAZgoajcCmalZrD9mkqwpm3Dte+" +
+                "Rn3vRHESsdZzYgDtN5tradGBa+csAx2XzK258mpNckVFUMdQGbR+QBCbPoreZCkHrAV+0NQB4F1y" +
+                "XShRnZUWnXFDyVtRZCT5j8esYhojJGVB6aSOpb/6o0lNLOBg/IbRofY5vy7c5/UPGY9FRUu3I5DF" +
+                "6F4o5EDB/0kDu7eIMfZYFEY6R6xbxk7N/17Wn3XvkK4Yn9I3SYwUgmh2YXB14pMoisTFKiD/TFdz" +
+                "sDeXBWquzOPOKeiLDFOFlrfDHUbiOdaWOl42XQWfNDn4K8qiPveD+KEF/kp+HxLVNWbndddcNiKT" +
+                "/nLq01jVCCUB9p8LmE+8GbzOTJi2FpRiAdg8S9mFeGZ/uNqTN7rwZaK16U036eu6sd0EEM5pELZj" +
+                "2jlNhaf8DT5TvwhjZ+eS3OI+T+IHDNaLuO+fXNAXKMqq+enmJ8gnWC4qwRjH6Kd8gIIx21EVeQAz" +
+                "/U39GBWE0KkbYceN/ode2cNVvqwIAfO7/YG3Rt23aInZjYlWAHXebnRzdrZB7c0TIzYsEc7Y8yWG" +
+                "r1YPr+Spz0Qg3gvUgjFAeCP4diFwUR6jmgD68dzwE+hJcZmvpo+wwaByCSWKy8+S875SJZkM+0p7" +
+                "/PHp+d0hmfRey0Vb4qiDnPQv9ddD9Rzb4D13i/i66N1hEjns3kK0TxkqM7IwN1WzXzY2h51YGHEn" +
+                "mDbO0lDhf1sWZjT7kJ2LttknhXn6NENPerzbNbLY6E2vHvo62VorIBOtKOzbZKzqA6ZisZY9MP+r" +
+                "TCsuPThkLNtXPhrdXAe5Vyebqs2A24A3uIf/</xenc:CipherValue></xenc:CipherData></xenc:EncryptedData></products>";
 
-        /*
-         * Load the key to be used for decrypting the xml data
-         * encryption key.
-         */
-        Security.addProvider(new BouncyCastleProvider());
-        KeyFactory factory = KeyFactory.getInstance("RSA");
-        Key kek = CertificateUtils.generatePrivateKey(factory, CertificateUtils.CERTIFICATE_DIR + "certificate/testaio1.pem");
-        //Key kek = loadKeyEncryptionKey();
+        System.out.println(decriptXml(xmlString,"testaio1.pem"));
+    }
 
-        String providerName = "BC";
+    public static String decriptXml(String xmlString, String cert){
+        try {
+            Document document = Encrypter.stringToXML(xmlString);
+            //Document document = loadEncryptionDocument();
 
-        XMLCipher xmlCipher =
-                XMLCipher.getInstance();
-        /*
-         * The key to be used for decrypting xml data would be obtained
-         * from the keyinfo of the EncrypteData using the kek.
-         */
-        xmlCipher.init(XMLCipher.DECRYPT_MODE, null);
-        xmlCipher.setKEK(kek);
-        /*
-         * The following doFinal call replaces the encrypted data with
-         * decrypted contents in the document.
-         */
-        xmlCipher.doFinal(document, encryptedDataElement);
+            Element encryptedDataElement =
+                    (Element) document.getElementsByTagNameNS(
+                            EncryptionConstants.EncryptionSpecNS,
+                            EncryptionConstants._TAG_ENCRYPTEDDATA).item(0);
 
-        outputDocToFile(document, "build/decryptedInfo.xml");
+            /*
+             * Load the key to be used for decrypting the xml data
+             * encryption key.
+             */
+            Security.addProvider(new BouncyCastleProvider());
+            KeyFactory factory = KeyFactory.getInstance("RSA");
+            Key kek = CertificateUtils.generatePrivateKey(factory, cert);
+            //Key kek = loadKeyEncryptionKey();
+
+            String providerName = "BC";
+
+            XMLCipher xmlCipher =
+                    XMLCipher.getInstance();
+            /*
+             * The key to be used for decrypting xml data would be obtained
+             * from the keyinfo of the EncrypteData using the kek.
+             */
+            xmlCipher.init(XMLCipher.DECRYPT_MODE, null);
+            xmlCipher.setKEK(kek);
+            /*
+             * The following doFinal call replaces the encrypted data with
+             * decrypted contents in the document.
+             */
+            xmlCipher.doFinal(document, encryptedDataElement);
+
+            return Encrypter.xmlToString(document);
+
+        }catch (Exception e){
+            return null;
+        }
+
     }
 }
