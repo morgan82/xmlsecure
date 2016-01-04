@@ -26,6 +26,7 @@ import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.apache.xml.security.keys.KeyInfo;
 import org.apache.xml.security.keys.content.X509Data;
 import org.globallogic.xmlsec.utils.CertificateUtils;
+import org.globallogic.xmlsec.utils.XmlUtils;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -56,19 +57,7 @@ public class Encrypter {
         org.apache.xml.security.Init.init();
     }
 
-    public static Document stringToXML(String xmlString) throws Exception {
 
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        Document document = null;
-        try {
-            document = factory.newDocumentBuilder().parse(new InputSource(new StringReader(xmlString)));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return document;
-    }
 
     private static SecretKey generateSymmetricKey() throws Exception {
         String jceAlgorithmName = "AES";
@@ -108,17 +97,6 @@ public class Encrypter {
         return keyCipher.encryptKey(document, symmetricKey);
     }
 
-    public static String xmlToString(Document doc) throws Exception {
-
-        TransformerFactory factory = TransformerFactory.newInstance();
-        Transformer transformer = factory.newTransformer();
-        StringWriter writer = new StringWriter();
-        transformer.transform(new DOMSource(doc.getDocumentElement()), new StreamResult(writer));
-        String result = writer.toString();
-        System.out.println(result);
-        return result;
-    }
-
     public static void main(String unused[]) throws Exception {
         String xmlString = "<?xml version=\"1.0\" encoding=\"UTF-8\"?><products><product id=\"1144\"  xmlns=\"http://example.com/product-info\"  xmlns:html=\"http://www.w3.org/1999/xhtml\"><name xml:lang=\"en\">Python Perfect IDE</name><description>Uses mind-reading technology to anticipate and accommodate all user needs in Python development. Implements all <html:code>from __future__ import</html:code>features though the year 3000. Works well with<code>1166</code>.</description></product><p:product id=\"1166\" xmlns:p=\"http://example.com/product-info\"><p:name>XSLT Perfect IDE</p:name><p:description xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:xl=\"http://www.w3.org/1999/xlink\"> <p:code>red</p:code><html:code>blue</html:code><html:div> <ref xl:type=\"simple\" xl:href=\"index.xml\">A link</ref></html:div></p:description></p:product></products>";
 
@@ -127,7 +105,7 @@ public class Encrypter {
 
     public static String encriptXml(String xmlString, String cert){
         try {
-            Document document = stringToXML(xmlString);
+            Document document = XmlUtils.stringToXML(xmlString);
         /*
          * Get a key to be used for encrypting the element.
          * Here we are generating an AES key.
@@ -154,7 +132,7 @@ public class Encrypter {
          * for the data to be encrypted.
          */
             xmlCipher.doFinal(document, document.getDocumentElement(), true);
-            return xmlToString(document);
+            return XmlUtils.xmlToString(document);
         }catch (Exception e){
             return  null;
         }

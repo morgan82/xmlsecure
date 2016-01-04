@@ -23,6 +23,7 @@ import org.apache.xml.security.utils.EncryptionConstants;
 import org.apache.xml.security.utils.JavaUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.globallogic.xmlsec.utils.CertificateUtils;
+import org.globallogic.xmlsec.utils.XmlUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -212,7 +213,7 @@ public class Decrypter {
 
     public static String decriptXml(String xmlString, String cert){
         try {
-            Document document = Encrypter.stringToXML(xmlString);
+            Document document = XmlUtils.stringToXML(xmlString);
             //Document document = loadEncryptionDocument();
 
             Element encryptedDataElement =
@@ -245,7 +246,7 @@ public class Decrypter {
              */
             xmlCipher.doFinal(document, encryptedDataElement);
 
-            return Encrypter.xmlToString(document);
+            return XmlUtils.xmlToString(document);
 
         }catch (Exception e){
             return null;
